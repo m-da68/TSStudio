@@ -112,7 +112,7 @@ public class PreLoaderController {
     }
 
     public void showMain(boolean doOpenSettings) throws IOException, SerialPortException {
-        status.setText("Wing selected");
+        if (doOpenSettings) status.setText("Wing selected");
         MainController.doOpenSettings = doOpenSettings;
         MainController.serial = serial;
         FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("main.fxml"));
@@ -140,7 +140,7 @@ public class PreLoaderController {
                     if (!data.isEmpty() & !data.equals(" ") & !data.equals("\n")) {
                         serial.removeEventListener();
                         if (data.contains("OK:TSTelemetry Command Wing by Dmitriy Gusev")) {
-                            if (!serial.getFriendlyName().toString().contains("TSTelemetry Command Wing")) {
+                            if (!serial.getFriendlyName().toString().contains(String.format("TSTelemetry Command Wing (COM%d)", serial.getComNumber()))) {
                                 serial.setFriendlyName(String.format("TSTelemetry Command Wing (COM%d)", serial.getComNumber()));
                             }
                             new Timeline(new KeyFrame(

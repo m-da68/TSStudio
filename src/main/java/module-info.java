@@ -4,6 +4,7 @@ module ru.tsconnect.tsstudio {
     requires jssc;
     requires java.prefs;
     requires com.install4j.runtime;
+    requires java.desktop;
 
 
     opens ru.tsconnect.tsstudio to javafx.fxml;

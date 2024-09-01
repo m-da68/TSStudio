@@ -48,3 +48,16 @@
 .checkbox:selected .box {
     -fx-background-color: #569AFF;
 }
+
+#control-scroll {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #569AFF;
+    -fx-border-radius: 10;
+    -fx-border-width: 2;
+}
+
+#control-scroll .viewport {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+}

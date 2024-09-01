@@ -19,9 +19,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import jssc.SerialPort;
@@ -62,6 +64,9 @@ public class MainController {
     public TextField controlsFieldSendText;
     public ChoiceBox controlsFieldType;
     public AnchorPane settings;
+    public ScrollPane controlScroll;
+    public VBox controlV;
+    public Text controlsMovStatus;
     protected ArrayList<Button> menuBtns = new ArrayList<>();
     protected ArrayList<Button> settingsBtns = new ArrayList<>();
     public AnchorPane paneCameraView;
@@ -117,13 +122,24 @@ public class MainController {
 
                 enterSettingsBtn();
                 showPane(btnSettings);
+            } else {
+                try {
+                    serial.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
+                } catch (SerialPortException e) {
+                    throw new RuntimeException(e);
+                }
             }
+
+            KeyDispatcher.start(this);
+
+
+
+//            setMovStatus(true);
         });
         refreshPorts();
         for (String port : portsAvailable) {
-            if (port.contains(serial.getCom())) {
-                settingsFieldCom.setValue(port);
-            }
+            settingsFieldCom.setValue(port);
+            serial.set(port);
         }
 
         controlsFieldType.setItems(FXCollections.observableArrayList("Пакет", "Команда"));
@@ -256,7 +272,7 @@ public class MainController {
             btnSettingsCheck.setUserData(0);
             exitMenuBtn(btnSettingsCheck);
         }
-        if (serial.isOpened()) serial.close();
+//        if (serial.isOpened()) serial.close();
         if (serial.open(serial.getCom((String) settingsFieldCom.getValue()))) {
             serial.settings(
                     (Integer) settingsFieldBaudrate.getValue(), (Integer) settingsFieldDatabits.getValue(),
@@ -264,16 +280,26 @@ public class MainController {
             );
             serial.setHardwareMode(doHardwareSerialMode.isSelected());
             serial.addEventListener(new PortReaderSetCheck(), SerialPort.MASK_RXCHAR);
-            serial.sendCMD("STATUS");
-
             new Timeline(new KeyFrame(
-                    Duration.millis(2000),
+                    Duration.millis(1600),
                     ae -> {
-                        if (!doPortConfirm) {
-                            setStatusSettingsCheck(false);
+                        try {
+                            serial.sendCMD("STATUS");
+                        } catch (SerialPortException e) {
+                            throw new RuntimeException(e);
                         }
                     }))
                     .play();
+
+//            new Timeline(new KeyFrame(
+//                    Duration.millis(2000),
+//                    ae -> {
+//                        if (!doPortConfirm) {
+//                            setStatusSettingsCheck(false);
+//                        }
+//                    }))
+//                    .play();
+            setStatusSettingsCheck(true);
         } else setStatusSettingsCheck(false);
     }
 
@@ -306,8 +332,9 @@ public class MainController {
             if(event.isRXCHAR() && event.getEventValue() > 0) {
                 try {
                     String data = serial.readString(event.getEventValue());
+                    System.out.println(data);
                     if (!data.isEmpty() & !data.equals(" ") & !data.equals("\n")) {
-                        if (data.contains("OK:TSTelemetry Command Wing by Dmitriy Gusev")) {
+                        if (data.contains("OK:TSTelemetry")) {
                             doPortConfirm = true;
                             new Timeline(new KeyFrame(
                                     Duration.millis(10),
@@ -326,6 +353,7 @@ public class MainController {
                         }
                         try {
                             serial.removeEventListener();
+                            serial.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
                         } catch (SerialPortException e) {
                             throw new RuntimeException(e);
                         }
@@ -506,15 +534,60 @@ public class MainController {
         }
     }
 
+    protected void terminalAdd(String text) {
+        System.out.println(text);
+        Text el = new Text(text);
+        el.setStyle("-fx-font-family: 'VK Sans Display Medium'; -fx-font-size: 13; -fx-font-style: normal");
+        Platform.runLater(() -> {
+            controlV.getChildren().add(el);
+            controlScroll.vvalueProperty().bind(controlV.heightProperty());
+        });
+    }
+
+    protected void terminalClear() {
+        controlV.getChildren().removeAll();
+    }
+
 /*
     !=== ANIMATIONS END ===!
  */
 
     public void controlsSend(ActionEvent actionEvent) throws SerialPortException {
-        if (controlsFieldType.getValue().equals("Пакет")) serial.sendSND(controlsFieldSendText.getText());
-        if (controlsFieldType.getValue().equals("Команда")) serial.sendCMD(controlsFieldSendText.getText());
+        if (controlsFieldType.getValue().equals("Пакет")) {
+            terminalAdd("Вы (Пакет): %s".formatted(controlsFieldSendText.getText()));
+            serial.sendSND(controlsFieldSendText.getText());
+        }
+        if (controlsFieldType.getValue().equals("Команда")) {
+            terminalAdd("Вы (Команда): %s".formatted(controlsFieldSendText.getText()));
+            serial.sendCMD(controlsFieldSendText.getText());
+        }
+    }
+    public void setMovStatus(boolean status) {
+        if (status) controlsMovStatus.setStyle("-fx-fill: #569AFF");
+        else controlsMovStatus.setStyle("-fx-fill: #999999");
     }
 
+
+/*
+    !=== MAIN LISTENER ===!
+ */
+
+
+    private class PortReader implements SerialPortEventListener {
+        public void serialEvent(SerialPortEvent event) {
+            if(event.isRXCHAR() && event.getEventValue() > 0) {
+                try {
+                    String data = serial.readString(event.getEventValue()).replaceAll("\\r\\n", "");
+                    if (!data.isEmpty() & !data.equals(" ") & !data.equals("\n")) {
+                        terminalAdd("Консоль: %s".formatted(data));
+                    }
+                }
+                catch (SerialPortException ex) {
+                    System.out.println(ex);
+                }
+            }
+        }
+    }
 
 
 

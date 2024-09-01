@@ -86,7 +86,7 @@ public class SerialBus {
 
     public Object getFriendlyName() {
         if (this.registryKey == null || this.registryKey.isEmpty()) {
-            throw new IllegalArgumentException("'registryKey' null or empty");
+            System.out.println("'registryKey' null or empty");
         }
         try {
             return WinRegistry.getValue(hkey, this.registryKey, "FriendlyName");
@@ -119,14 +119,14 @@ public class SerialBus {
     }
 
     public int getComNumber(String friendlyName) {
+        System.out.println(friendlyName);
         if (friendlyName != null && friendlyName.contains("COM")) {
             String substr = friendlyName.substring(friendlyName.indexOf("COM"));
             Matcher matchInt = Pattern.compile("\\d+").matcher(substr);
             if (matchInt.find()) {
                 return Integer.parseInt(matchInt.group());
             }
-        }
-        System.out.println(1);
+        } else System.out.println(1);
         return -1;
     }
 
@@ -147,7 +147,7 @@ public class SerialBus {
     }
 
     public void write(String data) throws SerialPortException {
-        serialPort.writeString(data);
+        serialPort.writeString(data+"\r");
     }
 
     public void sendCMD(String data) throws SerialPortException {

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -314,6 +315,26 @@
                         </ChoiceBox>
                      </children>
                   </GridPane>
+                  <ScrollPane id="control-scroll" fx:id="controlScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" hmax="0.0" pannable="true" stylesheets="@style.css" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="60.0">
+                     <content>
+                        <VBox fx:id="controlV" alignment="BOTTOM_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="1000.0" spacing="10.0">
+                           <padding>
+                              <Insets bottom="10.0" left="12.0" right="12.0" top="10.0" />
+                           </padding></VBox>
+                     </content>
+                  </ScrollPane>
+                  <HBox layoutX="222.0" layoutY="14.0" prefHeight="40.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                     <children>
+                        <AnchorPane prefHeight="200.0">
+                           <children>
+                              <Text fx:id="controlsMovStatus" fill="#999999" layoutX="89.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Движение" AnchorPane.leftAnchor="0.0">
+                                 <font>
+                                    <Font name="VK Sans Display Medium" size="14.0" />
+                                 </font>
+                              </Text>
+                           </children>
+                        </AnchorPane>
+                     </children></HBox>
                </children>
                <padding>
                   <Insets top="25.0" />
